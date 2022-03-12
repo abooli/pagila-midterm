@@ -10,3 +10,29 @@
  * NOTE:
  * Your results should not contain any duplicate titles.
  */
+
+WITH valid_actor_id AS (
+    SELECT actor_id
+    FROM actor
+    WHERE strpos(first_name, 'F') = 0 AND
+          strpos(last_name, 'F') = 0
+),
+
+valid_customer_id AS (
+    SELECT customer_id
+    FROM customer
+    WHERE strpos(first_name, 'F') = 0 AND
+          strpos(last_name, 'F') = 0
+)
+
+SELECT DISTINCT f.title
+FROM film f
+JOIN film_actor fa USING (film_id)
+JOIN inventory i USING (film_id)
+JOIN rental r USING (inventory_id)
+WHERE fa.actor_id IN (SELECT * FROM valid_actor_id) AND
+      r.customer_id IN (SELECT * FROM valid_customer_id) AND
+      strpos(title, 'F') = 0
+ORDER BY f.title
+;
+

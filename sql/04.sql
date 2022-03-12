@@ -15,3 +15,32 @@
  * NOTE:
  * You do not have to include movies with similarity score 0 in your results (but you may if you like).
  */
+
+WITH acid AS (
+    SELECT film_id
+    FROM film
+    WHERE title = 'AMERICAN CIRCUS'
+),
+
+customers AS (
+    SELECT DISTINCT customer_id
+    FROM rental r
+    JOIN inventory i USING (inventory_id)
+    WHERE film_id = (SELECT * FROM acid)
+),
+
+ids AS (
+    SELECT DISTINCT film_id, customer_id
+    FROM rental r
+    JOIN inventory i USING (inventory_id)
+    WHERE customer_id IN (SELECT * FROM customers)
+    GROUP BY film_id, customer_id
+)
+
+SELECT title, count(title) AS "similarity score"
+FROM film f
+JOIN ids USING (film_id)
+WHERE title != 'AMERICAN CIRCUS'
+GROUP BY title
+ORDER BY "similarity score" DESC;
+
